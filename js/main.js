@@ -1,4 +1,5 @@
-var request = require('request'); // "Request" library
+var request = require('request');
+var rp = require('request-promise'); // "Request" library
 
 var client_id = '13ff1a4fe1a743269c9153a2c3af1dea'; 
 var client_secret = 'fbf7f9a8b97a4f299db06d298e352e85'; 
@@ -15,63 +16,69 @@ var authOptions = {
   json: true
 };
 
-request.post(authOptions, function(error, response, body) {
-  if (!error && response.statusCode === 200) {
+// Error Handler
+let errorHandle = function(error){
+	try{throw new Error(error)}catch(e){console.log(e)}
+}
 
-    // use the access token to access the Spotify Web API
-    var token = body.access_token;
-    var options = {
-      url: 'https://api.spotify.com/v1/search?q=daft+punk&type=album',
-      headers: {
-        'Authorization': 'Bearer ' + token
-      },
-      json: true
-    };
-    request.get(options, function(error, response, body) {
-    	let test = body.albums.items.map(e=>e.name)
-    		console.log(test)
-    })
-  }
-});
+// get Genres
+let getGenres = function(body){
+	var token = body.access_token;
+	var options = {
+	  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi',
+	  headers: {
+	    'Authorization': 'Bearer ' + token
+	  },
+	  json: true
+	};
 
-
+	let genres = rp(options).then(e=>e.genres).catch(errorHandle)
+		return rp(options).then(e=>e.genres).catch(errorHandle)
 
 
-let base = 'https://api.spotify.com/';
-let albumSearch='v1/search?q=michael+jackson&type=album'
-
-// fetch(base+albumSearch).then(response=>response.json()).then(resp=>console.log(resp))
-
-// fetch('https://accounts.spotify.com/api/token').then(response=>response.json()).then(resp=>console.log(resp))
+}
 
 
-
-
-
-
-// function search(){
-
-// 	while (imageList.hasChildNodes()) {
-//     imageList.removeChild(imageList.lastChild);
-// 	}
-
-// 	var searchValue = document.getElementById("searchBox").value;
-// 	console.log(searchValue)
-// 	var xhr = $.get(`http://api.giphy.com/v1/gifs/search?q=${searchValue}&api_key=a5c163ee9c29473580e365c6cc226a99&limit=6`);
-// 	xhr.done(function(data) { 
-// 			console.log("success got data", data); 	
-
-// 	for(let i=0; i < 6;i++){
-// 		console.log(data.data[i].images.downsized.url)
-// 		var img = document.createElement('img');		
-// 		var li = document.createElement('li');
-// 		var list = document.getElementById('imageList');
-// 		img.setAttribute('src', data.data[i].images.downsized.url);
-// 		li.appendChild(img);
-// 		list.appendChild(li);
-	
-// 	}
-
-// 	});
-
+let findSimilar = function(body){
+	// return function(body){
+		var token = body.access_token;
+		var options = {
+		  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi/related-artists&limit=50',
+		  headers: {
+		    'Authorization': 'Bearer ' + token
+		  },
+		  json: true
+		};
+		return rp(options).then(function(data){
+			return data.artists.includes(e=>{
+				return JSON.stringify(e.genres) == JSON.stringify(body)
+			})
+		})
+		.then(e=>console.log(e)).catch(errorHandle)
+	}
 // }
+
+
+let auth = rp.post(authOptions)
+// auth.then(getGenres)
+auth.then(findSimilar)
+
+
+// request.post(authOptions, function(error, response, body) {
+//   if (!error && response.statusCode === 200) {
+//     // use the access token to access the Spotify Web API
+//     var token = body.access_token;
+//     var options = {
+//       url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi',
+//       headers: {
+//         'Authorization': 'Bearer ' + token
+//       },
+//       json: true
+//     };
+				// return request.get(options, function(error, response, body) {
+				// 	console.log(body)
+				// 	// let test = body.albums.items.map(e=>e.name)	
+				// })
+
+//   }
+// });
