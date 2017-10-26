@@ -1,5 +1,6 @@
 var request = require('request');
-var rp = require('request-promise'); // "Request" library
+var rp = require('request-promise'); 
+var _ = require('lodash');
 
 var client_id = '13ff1a4fe1a743269c9153a2c3af1dea'; 
 var client_secret = 'fbf7f9a8b97a4f299db06d298e352e85'; 
@@ -21,47 +22,97 @@ let errorHandle = function(error){
 	try{throw new Error(error)}catch(e){console.log(e)}
 }
 
+// Auth
+let auth = rp.post(authOptions)
+	.then(resp=>{
+		return {
+			access_token:resp.access_token
+		}
+	})
+	.catch(errorHandle)
+
+
 // get Genres
-let getGenres = function(body){
-	var token = body.access_token;
-	var options = {
-	  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi',
-	  headers: {
-	    'Authorization': 'Bearer ' + token
-	  },
-	  json: true
-	};
-
-	let genres = rp(options).then(e=>e.genres).catch(errorHandle)
-		return rp(options).then(e=>e.genres).catch(errorHandle)
-
-
-}
-
-
-let findSimilar = function(body){
-	// return function(body){
+let getGenres = function(artistId){
+	return function(body){
 		var token = body.access_token;
 		var options = {
-		  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi/related-artists&limit=50',
+		  url: `https://api.spotify.com/v1/artists/${artistId}`,
 		  headers: {
 		    'Authorization': 'Bearer ' + token
 		  },
 		  json: true
 		};
+		return rp(options).then(e=>{
+			console.log(e.genres)
+			return {
+				access_token:body.access_token, 
+				genres:	e.genres			
+			}
+		}).catch(errorHandle)
+	}
+}	
+
+
+let example = function(body){
+	var token = body.access_token;
+	var options = {
+	  url: 'https://api.spotify.com/v1/search?q=tania%20bowra&type=artist&limit=50',
+	  headers: {
+	    'Authorization': 'Bearer ' + token
+	  },
+	  json: true
+	};
+	return rp(options).then(e=>console.log(e)).catch(errorHandle)
+}
+
+
+let findSimilar = function(body){
+	
+		var token = body.access_token;
+		var options = {
+		  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi/related-artists',
+		  headers: {
+		    'Authorization': 'Bearer ' + token
+		  },
+		  json: true
+		};
+
+		function similarTags(genresToFind, currentGenres){
+			let result = false
+			genresToFind.forEach(e=>{
+				if(currentGenres.includes(e)){
+					result = true
+				}
+			})
+			return true
+		}
+
 		return rp(options).then(function(data){
-			return data.artists.includes(e=>{
-				return JSON.stringify(e.genres) == JSON.stringify(body)
+			let sortedResults = _.sortBy(data.artists, [e=>_.intersection(body.genres, e.genres).length, 'popularity'])
+			return sortedResults
+			.filter(e=>{
+					return _.intersection(body.genres, e.genres).length > 0
+			})
+			.reverse()
+			.map(e=>{
+				return{
+					name:e.name,
+					genres:_.intersection(body.genres, e.genres),
+					popularity:e.popularity
+				}
 			})
 		})
-		.then(e=>console.log(e)).catch(errorHandle)
 	}
 // }
 
 
-let auth = rp.post(authOptions)
-// auth.then(getGenres)
-auth.then(findSimilar)
+
+
+auth.then(getGenres('4tZwfgrHOc3mvqYlEYSvVi'))
+	.then(findSimilar)
+	.then(e=>console.log(e))
+// auth.then(example)
 
 
 // request.post(authOptions, function(error, response, body) {
