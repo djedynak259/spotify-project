@@ -49,7 +49,7 @@ let getGenres = function(artistOfInterest){
 
 		return rp(options)
 			.then(e=>{
-				console.log(e.genres)
+				console.log(`Genres listed for the artist ${artistOfInterest.name}\n`, e.genres)
 				return {
 					access_token:body.access_token,
 					artistOfInterest: artistOfInterest,
@@ -64,7 +64,7 @@ let getGenres = function(artistOfInterest){
 let findSimilarArtists = function(body){
 	let token = body.access_token;
 	let options = {
-	  url: 'https://api.spotify.com/v1/artists/4tZwfgrHOc3mvqYlEYSvVi/related-artists',
+	  url: `https://api.spotify.com/v1/artists/${body.artistOfInterest.id}/related-artists`,
 	  headers: {
 	    'Authorization': 'Bearer ' + token
 	  },
@@ -97,7 +97,8 @@ let findSimilarArtists = function(body){
 
 		return {
 			access_token: token,
-			artists:resultsToReturn
+			artists:resultsToReturn,
+			artistOfInterest: body.artistOfInterest
 		}
 	})
 }
@@ -115,7 +116,7 @@ let findArtistAlbumsIds = function(body){
 
 	return Promise.all(body.artists.map(e=>{
 		let artistOption = {
-			url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&limit=4`,
+			url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&limit=5`,
 			headers:commonOptions.headers,
 			json: commonOptions.json
 		}
@@ -134,7 +135,8 @@ let findArtistAlbumsIds = function(body){
 	.then(data=>{
 		return {
 			access_token: token,
-			artist_albums: data
+			artist_albums: data,
+			artistOfInterest: body.artistOfInterest
 		}
 	})
 
@@ -153,7 +155,6 @@ let topThreeAlbumsByPopularity = function(body){
 	};
 
 	return Promise.all(body.artist_albums.map(e=>{
-
 		return Promise.all(e.album_ids.map(f=>{
 			let albumOptions = {
 				url: `https://api.spotify.com/v1/albums/${f}`,
@@ -177,10 +178,10 @@ let topThreeAlbumsByPopularity = function(body){
 			result = result.sort((a,b)=>b.popularity-a.popularity).slice(0,3)
 			return {
 				artist: e.artist, 
-				top_albums: result
+				top_albums: result,
+				artistOfInterest: body.artistOfInterest
 			}
 		})
-
 	}))
 	.then(r=>{
 		let resultsToLog = r.map(t=>{
@@ -189,7 +190,7 @@ let topThreeAlbumsByPopularity = function(body){
 				top_albums: t.top_albums.map(p=>({album_name: p.album_name, popularity: p.popularity}))
 			}
 		})
-		console.log('\nTop 3 Albums by popularity for artists similar to Daft Punk\n',util.inspect(resultsToLog, false, null))
+		console.log(`\nTop 3 popular albums for each artists similar to ${body.artistOfInterest.name}\n`,util.inspect(resultsToLog, false, null))
 		return r
 	})
 }
@@ -201,7 +202,7 @@ auth.then(getGenres(artistOfInterest))
 	.then(topThreeAlbumsByPopularity)
 	// .then(r=>r.map(j=>console.log(j)))
 	// .then(e=>console.log('done',e))
-	// .catch(error=> console.log(error))
+	.catch(error=> console.log(error))
 
 
 // let example = function(body){
