@@ -1,6 +1,8 @@
 let request = require('request');
 let rp = require('request-promise'); 
 let _ = require('lodash');
+let util = require('util')
+
 
 let client_id = '13ff1a4fe1a743269c9153a2c3af1dea'; 
 let client_secret = 'fbf7f9a8b97a4f299db06d298e352e85'; 
@@ -91,7 +93,7 @@ let findSimilarArtists = function(body){
 			}
 		})
 
-		console.log(`Artists related to ${body.artistOfInterest.name} sorted by similarity and then popularity`, resultsToLog)
+		console.log(`\nArtists related to ${body.artistOfInterest.name} sorted by similarity and then popularity\n`, resultsToLog)
 
 		return {
 			access_token: token,
@@ -181,13 +183,14 @@ let topThreeAlbumsByPopularity = function(body){
 
 	}))
 	.then(r=>{
-		// let test = r.top_albums.map(t=>({album_name: t.album_name, popularity: t.popularity}))
-		let resultsToLog = {
-			artist: r.artist,
-			top_albums: 'test'
-		}
-		console.log('Top 3 Albums by popularity for artists similar to Daft Punk',resultsToLog)
-			return r
+		let resultsToLog = r.map(t=>{
+			return {
+				artist: t.artist,
+				top_albums: t.top_albums.map(p=>({album_name: p.album_name, popularity: p.popularity}))
+			}
+		})
+		console.log('\nTop 3 Albums by popularity for artists similar to Daft Punk\n',util.inspect(resultsToLog, false, null))
+		return r
 	})
 }
 
@@ -197,7 +200,7 @@ auth.then(getGenres(artistOfInterest))
 	.then(findArtistAlbumsIds)
 	.then(topThreeAlbumsByPopularity)
 	// .then(r=>r.map(j=>console.log(j)))
-	.then(e=>console.log('done',e))
+	// .then(e=>console.log('done',e))
 	// .catch(error=> console.log(error))
 
 
