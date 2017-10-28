@@ -230,6 +230,37 @@ let songsInAlbum = function(body){
 	  json: true
 	};	
 
+	return Promise.all(body.artist_top_albums
+		.map(e=>{
+			let totalPop;
+			e.top_albums.forEach(f=>{
+				totalPop += f.popularity
+			})
+			return Promise.all(e.top_albums.map(g=>{
+				let pop = g.popularity
+				let albumTrackOptions = {
+					url: `https://api.spotify.com/v1/albums/${g.id}/tracks?limit=50`,
+					headers:commonOptions.headers,
+					json: commonOptions.json
+				}
+				return rp(albumTrackOptions)
+					.then(resp=>{
+						return resp.items.map(j=>{
+							return j.name
+						})
+					})
+			})
+		)})
+	)
+	// .then(data=>{
+	// 	data.map(s=>{
+	// 		return{
+	// 			artist:body.artist_top_albums.artist,
+
+
+	// 		}
+	// 	})
+	// })
 
 }
 
@@ -240,7 +271,7 @@ auth.then(getGenres(artistOfInterest))
 	.then(findSimilarArtists)
 	.then(findArtistAlbumsIds)
 	.then(topThreeAlbumsByPopularity)
-	// .then(songsInAlbum)
+	.then(songsInAlbum)
 	.then(e=>console.log('done',util.inspect(e, false, null)))
 	.catch(error=> console.log(error))
 
