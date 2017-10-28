@@ -43,7 +43,9 @@ Run main.js file with Node.js to execute code.  Below is a list of main function
 
 a) Which Enpoints to Target Wsers - 
 
-First I would make note of the age range, most listened to genres, geography and gender of Eaze users, likely based on previous studies.  With this data, I would use enpoints focused on these demographics in order to pinpoint which spotify users to target.  (It appears that Spotify for Brands has access to different endpoints than the open web API - https://spotifyforbrands.com/us/targeting/)  To measure ROI, i would measure the click-throught on the ad itself that resulted in submitting contact information. Google analytics can be used to see if search results increased as a result of the new ad as well, although this data is less direct.
+First I would make note of the age range, most listened to genres, geography and gender of Eaze users, likely based on previous studies.  With this data, I would use enpoints focused on these demographics in order to pinpoint which spotify users to target.  (It appears that Spotify for Brands has access to different endpoints than the open web API - https://spotifyforbrands.com/us/targeting/)  
+
+To measure ROI, i would measure the click-throught on the ad itself that resulted in submitting contact information. Google analytics can be used to see if search results increased as a result of the new ad as well, although this data is less direct.
 
 b) Lightwight Test to Validate Hypothesis-
 
