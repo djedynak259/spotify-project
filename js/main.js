@@ -37,6 +37,7 @@ let auth = rp.post(authOptions)
     })
     .catch(error => console.log(error))
 
+
 // Get Genres of Artist
 
 let getGenres = function(artistOfInterest) {
@@ -116,7 +117,7 @@ let findSimilarArtists = function(body) {
 }
 
 
-// Find Popular Albums From Artist
+// Find Album Ids From Artist
 
 let findArtistAlbumsIds = function(body) {
     let token = body.access_token;
@@ -246,7 +247,7 @@ let topThreeAlbumsByPopularity = function(body) {
 
 // Build Setlists With Top 3 Albums
 
-let songsInAlbum = function(body) {
+let setListSongsInAlbum = function(body) {
     let token = body.access_token;
     let commonOptions = {
         headers: {
@@ -321,6 +322,6 @@ auth.then(getGenres(artistOfInterest))
     .then(findSimilarArtists)
     .then(findArtistAlbumsIds)
     .then(topThreeAlbumsByPopularity)
-    .then(songsInAlbum)
+    .then(setListSongsInAlbum)
     .catch(error => console.log(error))
 
