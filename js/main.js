@@ -140,7 +140,7 @@ let findArtistAlbumsIds = function(body) {
                     .then(resp => {
                         let artistOptionOffset = (i) => {
                             return {
-                                url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&offset=${i}&limit=50`,
+                                url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&album_type=album,single&offset=${i}&limit=50`,
                                 headers: commonOptions.headers,
                                 json: commonOptions.json
                             }

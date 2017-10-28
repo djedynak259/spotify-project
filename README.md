@@ -29,7 +29,7 @@ Uses Spotify Oauth API find listed genres of desired artist, in this case, Daft 
 The spofiy Endpoint API docs does not list endpoints to search by specific genre, so I used the related artists endpoint to return a list of related artists.
 
 ## findArtistAlbumsIds	
-The album search by artist API allows 50 results max, and some artists have over 50 albums.  This function generates a list of ALL albums per artist using the offset header and returns a list of album ids.
+The album search by artist API allows 50 results max, and some artists have over 50 albums.  This function generates a list of ALL U.S. albums per artist using the offset header and returns a list of album ids.  If desired, api call can easily be altered to only allow full length albums.  (currently albums and singles are included)
 
 ## topThreeAlbumsByPopularity
 Uses album ids to find album details including popularity.  Albums are sorted by popularity and anything below the top 3 are filtered out.
