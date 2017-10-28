@@ -41,15 +41,21 @@ Run main.js file with Node.js to execute code.  Below is a list of main function
 
 ## Answers to questions in Promp #4
 
-a) Which enpoints to target users - First I would make note of the age range, most listened to genres, geography and gender of Eaze users, likely based on previous studies.  With this data, I would use enpoints focused on these demographics in order to pinpoint which spotify users to target.  (It appears that Spotify for Brands has access to different endpoints than the open web API - https://spotifyforbrands.com/us/targeting/)  To measure ROI, i would measure the click-throught on the ad itself that resulted in submitting contact information. Google analytics can be used to see if search results increased as a result of the new ad as well, although this data is less direct.
+a) Which Enpoints to Target Wsers - 
 
-b) First I would define a hypothesis.  For example: ad will result in 200-click throughs per week.  Or, click-throughs from ad will result in 50 new signups per week.  
+First I would make note of the age range, most listened to genres, geography and gender of Eaze users, likely based on previous studies.  With this data, I would use enpoints focused on these demographics in order to pinpoint which spotify users to target.  (It appears that Spotify for Brands has access to different endpoints than the open web API - https://spotifyforbrands.com/us/targeting/)  To measure ROI, i would measure the click-throught on the ad itself that resulted in submitting contact information. Google analytics can be used to see if search results increased as a result of the new ad as well, although this data is less direct.
+
+b) Lightwight Test to Validate Hypothesis-
+
+First I would define a hypothesis.  For example: ad will result in 200-click throughs per week.  Or, click-throughs from ad will result in 50 new signups per week.  
 
 If I am A/B testing two different ads, I would ensure they both are shown to indentical audiences and measure click-through data of both ads over a set amount of time.  
 
 If this test is designed to determine whether or not we will continue using this marketing channel, i would suggest 2 rounds of on/off tests by monitoring click-through signup and website visit data while phasing the ad on-line and then off-line, each for an identical set amout of time.
 
-c)For positive results when testing a variety ads, I would look for the differences in the ads that resulted in more click-throughs and continue to design ads according to these differences.
+c) Scaling the Test - 
+
+For positive results when testing a variety ads, I would look for the differences in the ads that resulted in more click-throughs and continue to design ads according to these differences.
 
 As/If success continues I would continue to scale the channel by testing a wider age group, further experiments with gender, and additional genres.  Tests that don't meet a desired ROI would not be scaled.
 
