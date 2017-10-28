@@ -13,6 +13,7 @@ let artistOfInterest = {
 }
 
 // application requests authorization
+
 let authOptions = {
   url: 'https://accounts.spotify.com/api/token',
   headers: {
@@ -26,6 +27,7 @@ let authOptions = {
 
 
 // Authentication
+
 let auth = rp.post(authOptions)
 	.then(resp=>{
 		return {
@@ -35,6 +37,7 @@ let auth = rp.post(authOptions)
 	.catch(error=> console.log(error))
 
 // get Genres of artist
+
 let getGenres = function(artistOfInterest){
 	return function(body){
 		let token = body.access_token;
@@ -59,6 +62,7 @@ let getGenres = function(artistOfInterest){
 	}
 }	
 
+
 // Find Similar Artists
 
 let findSimilarArtists = function(body){
@@ -73,24 +77,26 @@ let findSimilarArtists = function(body){
 
 	return rp(options).then(function(data){
 		let sortedResults = _.sortBy(data.artists, [e=>_.intersection(body.genres, e.genres).length, 'popularity'])
-		.filter(e=>{
-				return _.intersection(body.genres, e.genres).length > 0
-		})
-		.reverse()
+			.filter(e=>{
+					return _.intersection(body.genres, e.genres).length > 0
+			})
+			.reverse()
 
-		let resultsToLog = sortedResults.map(e=>{
-			return{
-				name: e.name,
-				genres:_.intersection(body.genres, e.genres),
-				popularity: e.popularity
-			}
+		let resultsToLog = sortedResults
+			.map(e=>{
+				return{
+					name: e.name,
+					genres:_.intersection(body.genres, e.genres),
+					popularity: e.popularity
+				}
 		})
 
-		let resultsToReturn = sortedResults.map(e=>{
-			return{
-				id:e.id,
-				artistName: e.name,
-			}
+		let resultsToReturn = sortedResults
+			.map(e=>{
+				return{
+					id:e.id,
+					artistName: e.name,
+				}
 		})
 
 		console.log(`\nArtists related to ${body.artistOfInterest.name} sorted by similarity and then popularity\n`, resultsToLog)
@@ -103,6 +109,7 @@ let findSimilarArtists = function(body){
 	})
 }
 
+
 // findPopularAlbums from Artist
 
 let findArtistAlbumsIds = function(body){
@@ -114,24 +121,24 @@ let findArtistAlbumsIds = function(body){
 	  json: true
 	};
 
-	return Promise.all(body.artists.map(e=>{
-		let artistOption = {
-			url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&limit=4`,
-			headers:commonOptions.headers,
-			json: commonOptions.json
-		}
+	return Promise.all(body.artists
+		.map(e=>{
+			let offset = 0;
+			let artistOption = {
+				url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&offset=${offset}&limit=50`,
+				headers:commonOptions.headers,
+				json: commonOptions.json
+			}
 
-		let findAlbumsPromise = rp(artistOption)
-			.then(data=>{
-				return {
-					artist:e.artistName,
-					album_ids:data.items.map(j=>j.id)
-				}
+			return rp(artistOption)
+				.then(data=>{
+					return {
+						artist:e.artistName,
+						album_ids:data.items.map(j=>j.id)
+					}
+				})
 		})
-
-		return findAlbumsPromise
-
-	}))
+	)
 	.then(data=>{
 		return {	
 			access_token: token,
@@ -141,6 +148,7 @@ let findArtistAlbumsIds = function(body){
 	})
 
 }
+
 
 // Find Top Three Albums by Popularity
 
@@ -155,14 +163,19 @@ let topThreeAlbumsByPopularity = function(body){
 
 	return Promise.all(body.artist_albums
 		.map(e=>{
-			let albumsString = e.album_ids.join()
-			let albumOptions = {
-				url: `https://api.spotify.com/v1/albums/?ids=${albumsString}`,
-				headers:commonOptions.headers,
-				json: commonOptions.json
-			}			
-			return rp(albumOptions)
-				.then(data=>data.albums
+			let totalAlbums = []
+			while(e.album_ids.length > 0){
+				let albumsString = e.album_ids.splice(0,19).join()
+				let albumOptions = {
+					url: `https://api.spotify.com/v1/albums/?ids=${albumsString}`,
+					headers:commonOptions.headers,
+					json: commonOptions.json
+				}
+				totalAlbums.push(rp(albumOptions))
+			}
+			return Promise.all(totalAlbums)
+				.then(data=> {
+					return _.flatten(data.map(t=>t.albums))
 					.map(f=>{
 						return {
 							id: f.id,
@@ -174,23 +187,24 @@ let topThreeAlbumsByPopularity = function(body){
 					})
 					.sort((a,b)=>b.popularity-a.popularity)
 					.slice(0,3)
-				)
-				.then(res =>{
-					return {
-							artist: e.artist, 
-							top_albums: res
-						}
-				})
-				.catch(error=> console.log(error))
+			})
+			.then(res =>{
+				return {
+						artist: e.artist, 
+						top_albums: res
+				}
+			})
+			.catch(error=> console.log(error))
 		})
-		)
-	.then(r=>{
-		let resultsToLog = r.map(t=>{
-			return {
-				artist: t.artist,
-				top_albums: t.top_albums.map(p=>({album_name: p.album_name, popularity: p.popularity}))
-			}
-		})
+	)
+	.then(r => {
+		let resultsToLog = r
+			.map(t=>{
+				return {
+					artist: t.artist,
+					top_albums: t.top_albums.map(p=>({album_name: p.album_name, popularity: p.popularity}))
+				}
+			})
 
 		let resultsToReturn = {
 			artistOfInterest: body.artistOfInterest,
@@ -204,56 +218,22 @@ let topThreeAlbumsByPopularity = function(body){
 	})
 }
 
-// Get songs in album
-// let songsInAlbum = function(body){
-// 	let token = body.access_token;
-// 	let commonOptions = {
-// 	  headers: {
-// 	    'Authorization': 'Bearer ' + token
-// 	  },
-// 	  json: true
-// 	};
 
-// 	return Promise.all(body.artist_albums.map(e=>{
-// 		return Promise.all(e.album_ids.map(f=>{
-// 			let albumOptions = {
-// 				url: `https://api.spotify.com/v1/albums/${f}`,
-// 				headers:commonOptions.headers,
-// 				json: commonOptions.json
-// 			}			
-// 			return rp(albumOptions)
-// 				.then(data=> {
-// 					let album = {
-// 						id: data.id,
-// 						artist: e.artist,
-// 						album_name: data.name,
-// 						popularity: data.popularity,
-// 						tracks_href: data.tracks.href
-// 					}
-// 					return album
-// 				})
-// 				.catch(error=> console.log(error))		
-// 		}))			
-// 		.then(result=>{
-// 			result = result.sort((a,b)=>b.popularity-a.popularity).slice(0,3)
-// 			return {
-// 				artist: e.artist, 
-// 				top_albums: result,
-// 				artistOfInterest: body.artistOfInterest
-// 			}
-// 		})
-// 	}))
-// 	.then(r=>{
-// 		let resultsToLog = r.map(t=>{
-// 			return {
-// 				artist: t.artist,
-// 				top_albums: t.top_albums.map(p=>({album_name: p.album_name, popularity: p.popularity}))
-// 			}
-// 		})
-// 		console.log(`\nTop 3 popular albums for each artists similar to ${body.artistOfInterest.name}\n`,util.inspect(resultsToLog, false, null))
-// 		return r
-// 	})
-// }
+// Get songs in album
+
+let songsInAlbum = function(body){
+	let token = body.access_token;
+	let commonOptions = {
+	  headers: {
+	    'Authorization': 'Bearer ' + token
+	  },
+	  json: true
+	};	
+
+
+}
+
+
 
 // Run Code
 auth.then(getGenres(artistOfInterest))
@@ -264,6 +244,10 @@ auth.then(getGenres(artistOfInterest))
 	.then(e=>console.log('done',util.inspect(e, false, null)))
 	.catch(error=> console.log(error))
 
+
+
+
+// save until Project completed
 
 // let example = function(body){
 // 	let token = body.access_token;
@@ -356,4 +340,64 @@ auth.then(getGenres(artistOfInterest))
 // 		console.log(`\nTop 3 popular albums for each artists similar to ${body.artistOfInterest.name}\n`,util.inspect(resultsToLog, false, null))
 // 		return r
 // 	})
+// }
+
+
+
+
+// Offset album finder in progress -------------
+
+// findPopularAlbums from Artist
+
+// let findArtistAlbumsIds = function(body){
+// 	let token = body.access_token;
+// 	let commonOptions = {
+// 	  headers: {
+// 	    'Authorization': 'Bearer ' + token
+// 	  },
+// 	  json: true
+// 	};
+
+// 	return Promise.all(body.artists
+// 		.map(e=>{
+// 			let offset = 0;
+// 			let artistOption = {
+// 				url: `https://api.spotify.com/v1/artists/${e.id}/albums?market=US&offset=${offset}&limit=50`,
+// 				headers:commonOptions.headers,
+// 				json: commonOptions.json
+// 			}
+// // Fix  by making one cal lto check total then push in arrays of promises for promise all, also find a way to attach in offset
+// 			return rp(artistOption)
+// 				.then(resp =>{
+// 					let total = resp.items.map(j=>j.id)
+// 					for(let i = 0;i < Math.floor(resp.total/50);i++){
+// 						offset +=50
+// 						total.push(rp(artistOption).then(g=>g.items.map(j=>j.id)))
+// 						// rp(artistOption)
+// 						// 	.then(g=>{
+// 						// 		total = total.concat(g.items.map(j=>j.id))
+// 						// 	})
+// 					}
+				
+// 					total = _.flatten(total)
+// 						console.log(resp.total,total)
+// 					offset=0
+// 					return Promise.all(total)
+// 				})
+// 				.then(data=>{
+// 					return {
+// 						artist:e.artistName,
+// 						album_ids:data
+// 					}
+// 				})
+// 		})
+// 	)
+// 	.then(data=>{
+// 		return {	
+// 			access_token: token,
+// 			artist_albums: data,
+// 			artistOfInterest: body.artistOfInterest
+// 		}
+// 	})
+
 // }
