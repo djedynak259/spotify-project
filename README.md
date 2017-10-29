@@ -62,3 +62,6 @@ For positive results when testing a variety ads, I would look for the difference
 As/If success continues I would continue to scale the channel by testing a wider age group, further experiments with gender, and additional genres.  Tests that don't meet a desired ROI would not be scaled.
 
 Scaling this channel would be a good opportunity to add many more locations to this test.  By measure data by location, results could influence the cities that Eaze chooses to expand to next.
+
+
+Btw, I just want to say, this code would be an amaziny way to use the spotify API to discover new house music tracks and artists to form the perfect DJ set.  Just sayin'
