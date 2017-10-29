@@ -64,4 +64,4 @@ As/If success continues I would continue to scale the channel by testing a wider
 Scaling this channel would be a good opportunity to add many more locations to this test.  By measure data by location, results could influence the cities that Eaze chooses to expand to next.
 
 
-Btw, I just want to say, this code would be an amaziny way to use the spotify API to discover new house music tracks and artists to form the perfect DJ set.  Just sayin'
+By the way, this code would be an amaziny way to use the spotify API to discover new artists and tracks to DJ.
