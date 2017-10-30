@@ -24,4 +24,4 @@ This function returns data for the setlist organized by album.  This allows the 
 
 
 
-By the way, this code would be an amaziny way to use the spotify API to discover new artists and tracks to DJ ;)
+By the way, this code would be an amazing way to use the Spotify API to discover new artists and tracks to DJ ;)
